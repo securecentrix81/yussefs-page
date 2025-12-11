@@ -1,574 +1,718 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calvin &amp; Saharsh: Calvin's Wet Dream (Saharsh Edition) </title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Saharsh & Calvin — Interactive Saga (Advanced)</title>
+<style>
+  :root{
+    --bg-1:#0f1724;
+    --bg-2:#0b1220;
+    --card:#0f1726cc;
+    --accent:#8dd3ff;
+    --muted:#9aa6b2;
+    --glass: rgba(255,255,255,0.04);
+    --glass-2: rgba(255,255,255,0.02);
+  }
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue";background:linear-gradient(180deg,var(--bg-1),var(--bg-2));color:#e6eef6}
+  .wrap{max-width:980px;margin:28px auto;padding:28px;display:grid;grid-template-columns:1fr 320px;gap:20px}
+  @media (max-width:980px){.wrap{grid-template-columns:1fr; padding:16px}}
+  .panel{background:linear-gradient(180deg,var(--card), rgba(0,0,0,0.36));border-radius:14px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter: blur(8px);}
+  .title{font-size:1.3rem;font-weight:700;margin-bottom:6px}
+  .subtitle{font-size:0.9rem;color:var(--muted);margin-bottom:12px}
+  #scene {min-height:320px;white-space:pre-wrap;line-height:1.5;font-size:1rem;padding:12px;border-radius:8px;background:linear-gradient(180deg,var(--glass),var(--glass-2));border:1px solid rgba(255,255,255,0.03);transition: transform .18s ease, opacity .18s ease}
+  #scene.fade-out{opacity:0;transform:translateY(6px) scale(.998)}
+  .choices{display:grid;gap:10px;margin-top:14px}
+  .choiceBtn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:999px;text-align:left;color:inherit;cursor:pointer;font-size:0.95rem;transition:background .14s, transform .06s, box-shadow .12s}
+  .choiceBtn:hover{background:rgba(255,255,255,0.035);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.45)}
+  .choiceBtn:active{transform:translateY(0)}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--muted);font-size:0.86rem}
+  .stat{display:flex;flex-direction:column;gap:6px}
+  .statRow{display:flex;gap:8px;align-items:center}
+  .bar{height:10px;border-radius:999px;background:rgba(255,255,255,0.06);width:160px;overflow:hidden}
+  .barFill{height:100%;background:linear-gradient(90deg,var(--accent),#6ad1ff);width:0;transition:width .4s ease}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  button.ctrl{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
+  button.ctrl:hover{background:rgba(255,255,255,0.02)}
+  .history{max-height:220px;overflow:auto;padding:8px;border-radius:8px;background:rgba(0,0,0,0.12);font-size:0.92rem;margin-top:10px}
+  .choice-short{color:var(--accent);font-weight:600}
+  .footer{font-size:0.82rem;color:var(--muted);text-align:center;margin-top:18px}
+  .largeTitle{font-size:1.6rem;font-weight:800;margin:0 0 6px 0}
+  .flexRow{display:flex;gap:8px;align-items:center}
+  .progressWrap{display:flex;flex-direction:column;gap:6px}
+  .saveBadge{background:#072935;padding:6px 8px;border-radius:6px;color:#8be8ff;font-weight:600;border:1px solid rgba(138,232,255,0.08)}
+  /* keyboard hint */
+  .kbd{padding:4px 6px;border-radius:6px;background:rgba(255,255,255,0.03);font-weight:600;font-size:0.85rem;border:1px solid rgba(255,255,255,0.03)}
+</style>
 </head>
-
 <body>
+<div class="wrap">
+  <div class="panel">
+    <div class="largeTitle">Saharsh &amp; Calvin — an interactive saga</div>
+    <div class="subtitle">Advanced engine & branching story. Use 1–9 to pick choices. Save/load available.</div>
+
+    <div id="scene" aria-live="polite"></div>
+
+    <div class="choices" id="choices"></div>
+
+    <div class="meta">
+      <div class="flexRow">
+        <div class="progressWrap">
+          <div style="font-size:0.82rem;color:var(--muted)">Progress</div>
+          <div class="bar" style="width:220px"><div id="progressFill" class="barFill"></div></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="ctrl" id="undoBtn" title="Undo last choice (if available)">⤺ Undo</button>
+        <button class="ctrl" id="saveBtn">Save</button>
+        <button class="ctrl" id="loadBtn">Load</button>
+        <button class="ctrl" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div class="history" id="history" aria-live="polite"></div>
+    <div class="footer">Tip: Press number keys to choose quickly. You can edit the story object in the HTML to change content or variables.</div>
+  </div>
+
+  <aside class="panel" aria-hidden="false">
+    <div class="title">Status</div>
+    <div class="stat">
+      <div class="statRow"><strong>Affection</strong><div style="flex:1"></div><div class="bar"><div id="affBar" class="barFill" style="background:linear-gradient(90deg,#ff9fcf,#ffb86b);width:0"></div></div></div>
+      <div class="statRow"><strong>Tension</strong><div style="flex:1"></div><div class="bar"><div id="tenBar" class="barFill" style="background:linear-gradient(90deg,#ffa3a3,#ff6b6b);width:0"></div></div></div>
+      <div class="statRow"><strong>Honesty</strong><div style="flex:1"></div><div class="bar"><div id="honBar" class="barFill" style="background:linear-gradient(90deg,#a8ffb0,#66f7a1);width:0"></div></div></div>
+      <div style="height:8px"></div>
+      <div style="display:flex;gap:8px;align-items:center"><div class="saveBadge" id="savedBadge" style="display:none">Saved</div><div style="color:var(--muted);font-size:0.9rem">Scenes visited: <span id="steps">0</span></div></div>
+    </div>
+
+    <div style="height:12px"></div>
+    <div class="title">Quick legend</div>
+    <div style="color:var(--muted);font-size:0.9rem">
+      <div><span class="kbd">1..9</span> — pick choices</div>
+      <div><strong>Affection</strong> — higher opens romantic options</div>
+      <div><strong>Tension</strong> — too high causes miscommunication</div>
+      <div><strong>Honesty</strong> — unlocks truthful endings</div>
+    </div>
+  </aside>
+</div>
 
 <script>
+/*
+  Story engine notes:
+  - Each scene node: { text: string, choices: [ { text, next, effects, condition } ], onEnter }
+  - effects: { affection:+/-number, tension:+/-number, honesty:+/-number, progress:+/-number }
+  - condition: function(state) -> boolean OR an object shorthand {affection:">=20"}
+  - onEnter: function(state, scene) optional handler to run when entering scene
+  - endings are scenes with choices: []
+*/
+
 const story = {
-  // ACT 1 – THE FIRST THREAD
+  // ---------- ACT 1 ----------
   start: {
-    text:
-`Years from now, Saharsh will remember the sky the night everything finally came out between him and Calvin.
+    text: `Years from now, there's a night in Saharsh's memory marked by a sky he won't ever forget.
 
-But sagas don’t start with confessions.
-They start with something small. Ordinary. Easy to overlook.
+Sagas rarely begin with confessions.
+They begin with a small thing: a glance, an awkward smile, a shared joke.
 
-For Saharsh, it began the first time he noticed Calvin.`,
+Tonight, Saharsh notices someone new—hands clumsy around a reusable bottle, a careful face—Calvin.`,
     choices: [
-      { text: "Orientation day, in a crowded auditorium.", next: "meet_orientation" },
-      { text: "A quiet afternoon in the campus library.", next: "meet_library" },
-      { text: "The chaos of the computer lab before semester start.", next: "meet_lab" }
+      { text: "Offer him a seat nearby (friendly).", next: "meet_orientation_offer", effects: { affection: +1, honesty: +0 } },
+      { text: "Keep reading; watch him a little (reserved).", next: "meet_orientation_watch", effects: { tension: +1 } },
+      { text: "Wave and introduce yourself right away.", next: "meet_orientation_intro", effects: { affection: +2, honesty:+0 } }
+    ],
+    onEnter(state){ state.progressSeen = Math.max(state.progressSeen||0, 2) }
+  },
+
+  meet_orientation_offer: {
+    text: `Saharsh shifts his bag and pats the seat next to him—an easy, quiet invitation.
+
+Calvin breathes out and smiles, the bottle angled between his knees. They exchange names like landing the first footstep on a path.`,
+    choices: [
+      { text: "Ask about his plans for the semester.", next: "early_bonding", effects: { affection:+1 } },
+      { text: "Make a small joke to break the silence.", next: "early_bonding", effects: { affection:+1, tension:+0 } }
     ]
   },
 
-  meet_orientation: {
-    text:
-`The auditorium is loud and buzzing with nervous energy.
-
-Saharsh sits alone in the middle rows, flipping the corner of his notebook out of habit.
-
-When he looks up, he spots someone hesitating near the aisle—
-a guy with a reusable bottle in hand, scanning the room for a seat.
-
-Their eyes meet for a second longer than expected.
-The name tag on the bottle guy reads: “Calvin”.
-
-Something small flickers in Saharsh’s chest, like curiosity stretching awake.`,
+  meet_orientation_watch: {
+    text: `Saharsh watches as Calvin chooses a seat across the aisle instead. A curious, careful sort of interest settles in his chest—less forward, more observant.`,
     choices: [
-      { text: "Offer him a seat next to you.", next: "first_thread_bold" },
-      { text: "Pretend to stay absorbed in your notebook and see if he sits nearby anyway.", next: "first_thread_shy" }
+      { text: "Smile quietly and scribble in your notebook.", next: "early_bonding", effects: { honesty:+0 } },
+      { text: "Later, cross paths and say hello.", next: "early_bonding", effects: { affection:+1 } }
+    ]
+  },
+
+  meet_orientation_intro: {
+    text: `“Hi, I’m Saharsh,” he says, voice steady. Calvin's grin is sheepish, like relief. The conversation takes off on small things—favorite coffee, messy schedules, playlist recommendations.`,
+    choices: [
+      { text: "Swap playlists and notes.", next: "early_bonding", effects: { affection:+2 } }
     ]
   },
 
   meet_library: {
-    text:
-`The library smells like dust and coffee.
-
-Saharsh reaches up toward a textbook at the same time someone else turns the corner.
-
-They almost collide.
-
-“Sorry!” they say together.
-
-The other guy laughs first, bright and surprised. He’s holding iced coffee, condensation dripping.
-
-His laptop stickers introduce him before he even speaks:
-“Hi, I’m Calvin.”`,
+    text: `The library smells like late-night coffee and old paper. Saharsh reaches for the same spine as someone else. The collision of hands is the beginning of a joke they both laugh at—Calvin has the kind of laugh that starts in his chest.`,
     choices: [
-      { text: "Joke that you already knew his name from the sticker.", next: "first_thread_bold" },
-      { text: "Smile, step back, and let him reach the book first.", next: "first_thread_shy" }
+      { text: "Offer to share the book and sit together.", next: "early_bonding", effects: { affection:+1 } },
+      { text: "Let him take the book and ask for his name.", next: "early_bonding", effects: { affection:+1, honesty:+0 } }
     ]
   },
 
   meet_lab: {
-    text:
-`The lab is chaos—tangled cables, old machines groaning, people arguing with printers.
-
-Saharsh watches the guy next to him frown at his screen, clearly fighting a login error.
-
-“You have to hit Ctrl+Alt+F2,” Saharsh says lightly. “Then the system stops being dramatic.”
-
-Calvin looks up, startled, then laughs like he needed the help more than he’ll admit.`,
+    text: `The lab is a jungle of cables and the smell of dust. A login error blinks. Saharsh jokes a fix; Calvin's face brightens—grateful, amused. It feels like an alliance is forming in the small room.`,
     choices: [
-      { text: "Show him how to fix the issue properly.", next: "first_thread_bold" },
-      { text: "Let him try it himself and watch him figure it out.", next: "first_thread_shy" }
-    ]
-  },
-
-  first_thread_bold: {
-    text:
-`Saharsh leans in and offers a small smile.
-
-“I’m Saharsh,” he says simply.
-
-Calvin introduces himself back, adjusting the drink in his hand, and laughs like he’s relieved someone friendly appeared in the chaos.
-
-It’s nothing dramatic. Just a first hello.
-
-But every saga needs a first hello.`,
-    choices: [
-      { text: "Keep talking. Ask about his classes and interests.", next: "early_bonding" }
-    ]
-  },
-
-  first_thread_shy: {
-    text:
-`Saharsh hesitates, letting the moment drift.
-
-But minutes later, fate drags them into the same tiny interactions—
-passing pens, helping a confused classmate, shared comments about the noise.
-
-Eventually Calvin glances over and says,
-“I’m Calvin, by the way.”
-
-“Saharsh,” he replies, something warm easing into place.
-
-It isn’t smooth, but it’s theirs.`,
-    choices: [
-      { text: "Stay nearby and let the conversation grow slowly.", next: "early_bonding" }
+      { text: "Show a clever shortcut and laugh it off.", next: "early_bonding", effects: { affection:+1 } },
+      { text: "Give him space and watch him try first.", next: "early_bonding", effects: { tension:+1 } }
     ]
   },
 
   early_bonding: {
-    text:
-`Days blur into weeks. Somehow Saharsh and Calvin are always near each other.
-
-Calvin constantly carries a drink—water, tea, something sweet—
-and without meaning to, Saharsh starts teasing him about his ‘hydration obsession.’
-
-They share playlists. Swap notes. Send memes during boring lectures.
-
-Soon there’s a rhythm to it, easy and familiar, like they’ve known each other much longer than they have.`,
+    text: `They start meeting more. A rhythm forms: playlists, late-night projects, coffee runs. Calvin always has a drink. Saharsh teases him; Calvin pretends annoyance but always reaches for a sip.`,
     choices: [
-      { text: "Their thing becomes late-night study sessions.", next: "early_bonding_memory" },
-      { text: "Their thing becomes walking and talking after class.", next: "early_bonding_memory" },
-      { text: "Their thing becomes teaming up on every group project.", next: "early_bonding_memory" }
+      { text: "Invite him for a study night (build closeness).", next: "study_night", effects: { affection:+2 } },
+      { text: "Keep things casual; don't push the boundary.", next: "slow_burn", effects: { honesty:-1 } }
     ]
   },
 
-  early_bonding_memory: {
-    text:
-`Whatever shape their routines take—café tables covered in notes, quiet footsteps after class, or glowing code windows at 2am—little rituals form.
-
-Calvin always shows up with a drink.
-Saharsh always rolls his eyes and steals a sip.
-
-At first, it’s just friendship.
-
-But already, without either of them realizing,
-this is the first year of a much longer story.`,
+  study_night: {
+    text: `The study night extends into dawn. They talk about minor things, then heavier ones—family, pressure, what's expected. There is a softness when Calvin admits being tired; Saharsh wants to stay with him.`,
     choices: [
-      { text: "Let time skip to the next chapter.", next: "year_two_start" }
+      { text: "Tell him something personal (vulnerability).", next: "vulnerability_shared", effects: { honesty:+2, affection:+1 } },
+      { text: "Change the subject; keep the mood light.", next: "slow_burn", effects: { tension:+1 } }
     ]
   },
 
-  // ——— ACT 2 ———
-  year_two_start: {
-    text:
-`Year Two settles in quietly.
-
-People start assuming “Saharsh and Calvin” is a pair deal.
-When someone calls one, the other follows naturally.
-
-Saharsh scrolls through their shared playlists
-while Calvin talks animatedly, drink in hand as always.
-
-One cool evening, they sit under a campus lamp,
-conversations drifting deeper than usual.`,
+  slow_burn: {
+    text: `They become reliable parts of each other's days. The closeness is comfortable, warm, like a sweater. But sometimes, Saharsh wonders if he could say more—and whether he should.`,
     choices: [
-      { text: "Saharsh opens up about something personal he rarely shares.", next: "year_two_vulnerable" },
-      { text: "Saharsh keeps the conversation light, afraid to go deeper.", next: "year_two_light" }
+      { text: "Start to notice feelings more clearly.", next: "realization", effects: { honesty:+0 } },
+      { text: "Push the thought away and enjoy the friendship.", next: "realization", effects: { honesty:-1 } }
     ]
   },
 
-  year_two_vulnerable: {
-    text:
-`The words feel heavy but honest.
-
-Saharsh talks about pressure, burnout, expectations—
-things he rarely lets show.
-
-He watches Calvin’s expression shift from surprise
-to something softer. Worrying. Caring.
-
-“I’m glad you told me,” Calvin says.
-“I’m here. I’m not going anywhere.”
-
-Something in Saharsh loosens, like a knot finally untying.`,
+  vulnerability_shared: {
+    text: `Saharsh says the thing he's kept inside for months. The confession lands like a soft weight on the table. Calvin listens in a way that makes Saharsh feel less small.`,
     choices: [
-      { text: "Notice how safe being with Calvin feels.", next: "realization" }
-    ]
-  },
-
-  year_two_light: {
-    text:
-`The deeper words hover beneath the surface,
-but Saharsh keeps them tucked away.
-
-He jokes lightly instead, skimming over the real stuff.
-
-Still, Calvin nudges him gently.
-“You okay? You seem… far away sometimes.”
-
-“I’m fine,” Saharsh lies automatically.
-
-Calvin doesn’t push. He simply stays.  
-That somehow means more than questions.`,
-    choices: [
-      { text: "Realize how much his presence steadies you.", next: "realization" }
+      { text: "Thank him for listening and lean closer.", next: "realization", effects: { affection:+2, honesty:+1 } }
     ]
   },
 
   realization: {
-    text:
-`It doesn’t hit Saharsh all at once.
-
-It comes in pieces:
-Calvin’s laugh,
-his texts that brighten a long day,
-the tiny concern in his voice when he says “get home safe.”
-
-One night, scrolling through months of messages,
-Saharsh finally sees it clearly.
-
-“Oh,” he whispers.
-
-Somewhere along the way,
-he’s fallen in love with Calvin.`,
+    text: `It arrives in shards: a laugh that seems meant for him, a text that lingers in his mind, the constant craving for the sound of Calvin's voice. Saharsh realizes—slowly, tenderly—that this is more than friendship.`,
     choices: [
-      { text: "Try to ignore it and act normal.", next: "year_three_start" },
-      { text: "Quietly decide you'll tell him someday.", next: "year_three_start" },
-      { text: "Just enjoy the moments as they are.", next: "year_three_start" }
+      { text: "Tell yourself it's nothing.", next: "avoidance", effects: { honesty:-1 } },
+      { text: "Decide to wait and watch—maybe confess later.", next: "guarded_planning", effects: { tension:+0 } },
+      { text: "Plan to tell him when it feels safe.", next: "prepare_confession", effects: { honesty:+0 } }
     ]
   },
 
-  // ——— ACT 3 ———
-  year_three_start: {
-    text:
-`Year Three shifts everything.
-
-Internships. Deadlines. Family calls.
-Life pulls in every direction.
-
-Their texts slow down.
-Their plans miss each other.
-
-Saharsh still looks for Calvin in crowded halls,
-but sometimes Calvin isn’t there—
-or he’s rushing, tired, drink in hand and apologies spilling out.`,
+  avoidance: {
+    text: `Saharsh pretends. He laughs when others do, hears Calvin's jokes without leaning in. But the pretending costs him—late nights of staring at old messages and wondering.`,
     choices: [
-      { text: "Saharsh keeps reaching out, trying to stop the drift.", next: "year_three_reach" },
-      { text: "Saharsh pulls back, telling himself Calvin is busy.", next: "year_three_drift" }
+      { text: "Pull back and give Calvin space.", next: "drift", effects: { tension:+1 } },
+      { text: "Force a meeting and try to be 'normal'.", next: "forced_meet", effects: { tension:+1 } }
     ]
   },
 
-  year_three_reach: {
-    text:
-`Saharsh sends memes, asks to meet up, 
-leaves little reminders that he’s still here.
-
-Sometimes they meet. Sometimes they don’t.
-
-The harder he tries, the more he worries he’s being too much.
-
-He sits alone at a table, staring at the water ring left by Calvin’s drink,
-wondering if he should stop trying so hard.`,
+  guarded_planning: {
+    text: `He keeps a mental list of perfect moments: rooftops, cafes, a train station with rain. The problem is that life moves faster than lists.`,
     choices: [
-      { text: "A small misunderstanding finally boils over.", next: "year_three_argument_soft" }
+      { text: "Know when to wait and when to act—start moving.", next: "act_before_move", effects: { honesty:+1 } },
+      { text: "Keep perfecting the moment; wait for 'the right one'.", next: "wait_til_later", effects: { honesty:-1 } }
     ]
   },
 
-  year_three_drift: {
-    text:
-`Saharsh decides to step back.
-
-Give Calvin space. Be easy. Be unbothered.
-
-But each time he sees Calvin laughing with someone new,
-something aches in his chest.
-
-When they finally talk again,
-it feels stiffer—like pieces aren’t fitting the same way.`,
+  prepare_confession: {
+    text: `He decides: honesty will win. He writes drafts, practices lines, imagines answers and refusals. The act of planning steadies him.`,
     choices: [
-      { text: "An awkward convo tilts into an argument.", next: "year_three_argument_sharp" }
+      { text: "Pick a rooftop confession.", next: "rooftop_plan", effects: { honesty:+1 } },
+      { text: "Write a letter instead of speaking.", next: "letter_plan", effects: { honesty:+0 } }
     ]
   },
 
-  year_three_argument_soft: {
-    text:
-`It starts small.
-
-A late reply. A cancelled plan.
-
-“I feel like you’re slipping away,” Saharsh says quietly.
-
-Calvin looks tired. “I’m trying. I swear I’m trying.”
-
-They aren’t angry at each other—
-just overwhelmed by everything else.
-
-Finally, the frustration softens.
-
-“I don’t want to lose this,” Saharsh murmurs.
-
-“You won’t,” Calvin says quickly. Like he needs it to be true.`,
+  // ---------- ACT 2 — fractures and choices ----------
+  drift: {
+    text: `Life tugs. Internships, deadlines, home calls. Messages become shorter. Small irritations grow into silence. Saharsh fears he's losing the easy rhythm they once had.`,
     choices: [
-      { text: "Later, they talk for hours.", next: "year_three_night_talk" }
+      { text: "Reach out with a meme and a light message (try to reconnect).", next: "reach_out", effects: { affection:+0 } },
+      { text: "Assume Calvin is busy; step back.", next: "step_back", effects: { tension:+1 } }
     ]
   },
 
+  forced_meet: {
+    text: `They meet, and each interaction has the weight of unsaid things. Saharsh notices little changes: Calvin's eyes are tired, his grin smaller. The night ends with both taking a breath too long.`,
+    choices: [
+      { text: "Say 'I miss you'—soft and honest.", next: "confession_almost", effects: { honesty:+1, affection:+1 } },
+      { text: "Keep things light and leave early.", next: "drift", effects: { tension:+1 } }
+    ]
+  },
+
+  reach_out: {
+    text: `Sometimes small things open doors again: a timed, ridiculous meme, a "you up?" at midnight. They talk. For a moment, the lag disappears.`,
+    choices: [
+      { text: "Arrange a short meet-up between schedules.", next: "short_meet", effects: { affection:+1 } },
+      { text: "Play it safe—text until you can meet properly.", next: "text_comfort", effects: { honesty:-0 } }
+    ]
+  },
+
+  step_back: {
+    text: `Saharsh tells himself that space will make the heart grow fonder. Instead, silences grow and assumptions creep in. Tension rises.`,
+    choices: [
+      { text: "Push to explain by text", next: "text_misread", effects: { tension:+1 } },
+      { text: "Make a call and say 'we should talk'", next: "phone_talk", effects: { honesty:+1 } }
+    ]
+  },
+
+  short_meet: {
+    text: `They find twenty minutes in a campus courtyard. The conversation is careful but sincere. There is room to breathe.`,
+    choices: [
+      { text: "Bring up future plans and how they make you feel.", next: "future_confront", effects: { honesty:+1 } },
+      { text: "Laugh it off and try to keep the meeting light.", next: "reconnect_light", effects: { affection:+0 } }
+    ]
+  },
+
+  text_misread: {
+    text: `Text runs cold: short replies, awkward ellipses. A joke is misread; something meant as comfort becomes conflict. Tension spikes.`,
+    choices: [
+      { text: "Apologize and admit your worry.", next: "apologize", effects: { honesty:+1, tension:-1 } },
+      { text: "Let it go and hope it passes.", next: "drift", effects: { tension:+1 } }
+    ]
+  },
+
+  phone_talk: {
+    text: `They talk on the phone for hours. There's crying and laughter and the kind of honesty that stitches small wounds. Honesty rises; tension eases.`,
+    choices: [
+      { text: "Plan to confess properly soon.", next: "prepare_confession", effects: { honesty:+1 } },
+      { text: "Keep the call as reassurance and shelve deeper talk.", next: "reconnect_light", effects: { honesty:-0 } }
+    ]
+  },
+
+  reconnect_light: {
+    text: `There are small, glowing moments—cafés, shared playlists, staying up too late. The easy closeness returns, if only for a while.`,
+    choices: [
+      { text: "Let the closeness grow into a deeper talk.", next: "prepare_confession", effects: { affection:+1 } },
+      { text: "Mask feelings as jokes and don't push it further.", next: "avoidance", effects: { honesty:-1 } }
+    ]
+  },
+
+  future_confront: {
+    text: `Talk turns to the future—jobs, cities, leaving. A quiet panic: the dates move closer for Calvin's possible departure. Saharsh feels urgency bloom.`,
+    choices: [
+      { text: "Confess now (risky, honest).", next: "confess_now", effects: { honesty:+2, affection:+1 } },
+      { text: "Write a letter—truth on paper.", next: "letter_plan", effects: { honesty:+1 } }
+    ]
+  },
+
+  confess_now: {
+    text: `Under a campus lamp, voice small and steady, Saharsh says, "I think I'm in love with you." The admission is a release. Calvin's face shifts—surprised, then soft.`,
+    choices: [
+      { text: "Wait for his response, whatever it is.", next: "reaction_core", effects: { tension:+0 } },
+      { text: "Add more—explain what it means to you.", next: "explain_depth", effects: { honesty:+1 } }
+    ]
+  },
+
+  confession_almost: {
+    text: `The words nearly slip out and get swallowed. Calvin reads the nearly-sentence on Saharsh's face and asks, gently, "Is there something you want to say?" The air hums.`,
+    choices: [
+      { text: "Take the risk and say it outright.", next: "confess_now", effects: { honesty:+2 } },
+      { text: "Back away and say you'll think on it.", next: "avoidance", effects: { tension:+1 } }
+    ]
+  },
+
+  explain_depth: {
+    text: `Saharsh traces memories aloud: nights they shared, messages saved, the weight of small kindnesses. Calvin listens like he's trying to memorize the map to Saharsh's chest.`,
+    choices: [
+      { text: "Hold his hand and stay in the moment.", next: "reaction_core", effects: { affection:+2, honesty:+1 } },
+      { text: "Step back—let Calvin respond without pressure.", next: "reaction_core", effects: { honesty:+0 } }
+    ]
+  },
+
+  // ---------- intermediate reaction area ----------
+  reaction_core: {
+    text: `Calvin's response is a long breath, then a laugh that turns into something gentler.
+
+"I thought it was just me," he says honestly. "I didn't know if I was allowed to say it."`,
+    choices: [
+      { text: "Listen and let relief wash over you.", next: "deepen", effects: { affection:+2, tension:-1 } },
+      { text: "Ask how long he felt the same.", next: "deepen_time", effects: { honesty:+1 } }
+    ]
+  },
+
+  deepen: {
+    text: `They talk for hours—literal, messy language for something that has always been felt. Small, steady promises find shape: "We'll try," "We'll be honest."`,
+    choices: [
+      { text: "Lean into this new beginning", next: "epilogue_together", effects: { affection:+3, honesty:+1 } }
+    ]
+  },
+
+  deepen_time: {
+    text: `Calvin nervously lists moments he almost said it back, nights when he waited for a sign. The confessions knit them closer than they'd dared hope.`,
+    choices: [
+      { text: "Choose to be together and accept the worry.", next: "epilogue_together", effects: { affection:+3 } }
+    ]
+  },
+
+  // ---------- letter path ----------
+  letter_plan: {
+    text: `Saharsh spends hours on a single letter—careful, raw, honest. He folds it and decides how to give it: now, or when the plane is at the gate?`,
+    choices: [
+      { text: "Give it before he leaves (courage).", next: "letter_give", effects: { honesty:+2 } },
+      { text: "Send after departure (safe, risky).", next: "letter_late", effects: { tension:+1 } }
+    ]
+  },
+
+  letter_give: {
+    text: `They stand in the doorway. Saharsh passes the paper with shaking hands. Calvin reads in silence; his eyes leak, then he looks up with a steadier face.`,
+    choices: [
+      { text: "Ask him what he felt reading it.", next: "reaction_letter", effects: { affection:+2 } }
+    ]
+  },
+
+  reaction_letter: {
+    text: `Calvin reads: "I kept waiting for you to pull away. I didn't want to be too much." He smiles, then confesses he felt the same. But there's a quiet fear—distance does not come without cost.`,
+    choices: [
+      { text: "Decide to try long-distance honestly.", next: "epilogue_long_distance", effects: { affection:+2 } },
+      { text: "Plan a final day together and then see.", next: "epilogue_together", effects: { tension:+1 } }
+    ]
+  },
+
+  letter_late: {
+    text: `The letter leaves the outbox as the plane rises. The message lands like a small comet. Calvin replies hours later: "I needed this." But an ache remains—their first real talk happened with screens between them.`,
+    choices: [
+      { text: "Talk long-distance and plan a visit.", next: "epilogue_long_distance", effects: { affection:+1 } },
+      { text: "Regret missing the chance to say it in person.", next: "epilogue_bittersweet", effects: { tension:+1 } }
+    ]
+  },
+
+  // ---------- tensions escalate ----------
   year_three_argument_sharp: {
-    text:
-`It was supposed to be simple.
-
-Instead, everything spills out wrong.
-
-“You barely talk to me anymore,” Saharsh blurt
-
-```html
-s before thinking.
-
-“That’s not fair,” Calvin shoots back. “You’ve been distant too.”
-
-The hurt stacks up between them,
-full of things neither has said out loud:
-I miss you.
-I need you.
-I don’t know how to say it.
-
-Silence stretches.
-
-“I don’t want this,” Saharsh says finally.
-
-“Me neither,” Calvin answers. “Let’s fix it.”`,
+    text: `A careless phrase turns sharp. Voices rise. Things said in the heat bruise in ways neither planned.`,
     choices: [
-      { text: "That night, they really talk.", next: "year_three_night_talk" }
+      { text: "Step back and apologize later.", next: "apologize", effects: { tension:-1, honesty:+0 } },
+      { text: "Hold your ground; air your grievances.", next: "air_grievance", effects: { tension:+1 } }
+    ]
+  },
+
+  apologize: {
+    text: `Saying sorry is a small, brave bridge. The apology is worn and honest. Conversation begins to stitch things back together.`,
+    choices: [
+      { text: "Ask to talk later, properly.", next: "year_three_night_talk", effects: { honesty:+1 } }
+    ]
+  },
+
+  air_grievance: {
+    text: `They air hard things—neglect, fear, misunderstanding. It clears space but leaves the night raw. Honesty rises, but so does fragile distance.`,
+    choices: [
+      { text: "Agree to try better; set boundaries.", next: "year_three_night_talk", effects: { honesty:+1, tension:-1 } },
+      { text: "Take time apart to cool down.", next: "drift", effects: { tension:+2 } }
     ]
   },
 
   year_three_night_talk: {
-    text:
-`The late-night conversation glows in the dark.
-
-They talk about burnout, pressure, fear, and the strange fragility of depending on someone.
-
-At one point, Saharsh almost tells the truth—
-that the real fear is loving Calvin this much.
-
-The words rise to his tongue, trembling.`,
+    text: `They talk through the night. The confessions hover: "I was scared", "I didn't want to hurt you", "I didn't know how to ask." By dawn, there's a sense of repair—not perfect, but intentional.`,
     choices: [
-      { text: "Let it almost slip out, then swallow it back.", next: "year_three_promise" },
-      { text: "Hint at it—say there's something big you’ll tell him someday.", next: "year_three_promise" }
+      { text: "Make a promise to be more honest.", next: "prepare_confession", effects: { honesty:+1 } }
     ]
   },
 
-  year_three_promise: {
-    text:
-`Saharsh doesn’t reveal everything.
-
-But he says enough.
-
-“I don’t want you gone from my life,” he admits softly.
-
-Calvin breathes in, steady. “You won’t lose me.  
-And… when you’re ready to tell me the thing—  
-I’ll listen.”
-
-It feels like a promise sealed in the dark.`,
+  // ---------- endings / epilogues ----------
+  epilogue_together: {
+    text: `They choose each other. Years of small decisions become a habit: frank calls, chaotic visits, playlists titled for late trains. Not everything is easy, but they show up—again and again.`,
     choices: [
-      { text: "Let time pull them into the final year.", next: "year_four_start" }
-    ]
+      { text: "Rewind to begin again", next: "start", effects: { affection:0, tension:0, honesty:0 } }
+    ],
+    onEnter(state){
+      // end state adjustments
+      state.ending = "together";
+    }
   },
 
-  // ——— ACT 4 ———
-  year_four_start: {
-    text:
-`Final year crashes in with deadlines and big decisions.
-
-One afternoon, sitting on the campus steps,
-Saharsh mentions it lightly:
-
-“So… I might be moving. Different city. Maybe different country.”
-
-Calvin freezes. His reaction is small,
-but to Saharsh it feels like a tremor he can’t ignore.`,
+  epilogue_long_distance: {
+    text: `Distance becomes a shape they learn to wear. Calls at odd hours, photos of sunsets, carefully planned visits. There are lonely nights, but never the ache of not knowing.`,
     choices: [
-      { text: "Saharsh decides he has to confess before everything scatters.", next: "year_four_now" },
-      { text: "Saharsh convinces himself to wait for a 'better time.'", next: "year_four_wait" }
-    ]
+      { text: "Rewind and change decisions", next: "start", effects: { affection:0 } }
+    ],
+    onEnter(state){
+      state.ending = "long_distance";
+    }
   },
 
-  year_four_now: {
-    text:
-`Saharsh counts invisible milestones.
-
-Last semester. Last festival. Last everything.
-
-The thought of leaving without telling Calvin the truth
-feels unbearable.
-
-“I’m going to tell him,” he decides.
-
-Not someday.  
-Now.`,
+  epilogue_bittersweet: {
+    text: `They keep what's good: memories, small rituals, the knowledge of each other's hearts. But the timing wasn't kind to them. Sometimes love is real and still not enough for a certain present.`,
     choices: [
-      { text: "Plan a rooftop moment under the night sky.", next: "rooftop_plan" },
-      { text: "Keep it simple—at their usual café.", next: "cafe_plan" }
-    ]
+      { text: "Try again from the start", next: "start" }
+    ],
+    onEnter(state){
+      state.ending = "bittersweet";
+    }
   },
 
-  year_four_wait: {
-    text:
-`“Later,” Saharsh tells himself.
-
-After exams. After applications.  
-When life settles down.
-
-But one evening Calvin texts:
-
-“Got the abroad position. Leaving sooner than I thought.”`,
+  epilogue_reunion: {
+    text: `Years later, a platform, an arrivals board, a familiar pair of shoulders. Time has changed them, but not the core. They run, they speak, they make new plans with the old warmth present.`,
     choices: [
-      { text: "Panic—realize later is now.", next: "year_four_push" }
-    ]
+      { text: "Live another chapter", next: "epilogue_together" }
+    ],
+    onEnter(state){
+      state.ending = "reunion";
+    }
   },
 
-  year_four_push: {
-    text:
-`The countdown shrinks frighteningly fast.
-
-Every moment with Calvin hums with urgency.
-
-Saharsh scrolls through years of photos—
-Calvin’s grin, their shared notes, his ever-present drinks—
-and realizes there will never be a perfect moment.
-
-Only this one.`,
+  epilogue_alone: {
+    text: `Sometimes the bravest thing is to let go. Saharsh learns, grows, moves into his own life without Calvin. The memory is tender, the ache eventually a quieter, human thing.`,
     choices: [
-      { text: "Ask to meet and finally say it.", next: "rooftop_plan" },
-      { text: "Write a letter and let him read it.", next: "letter_plan" }
-    ]
+      { text: "Restart the saga", next: "start" }
+    ],
+    onEnter(state){
+      state.ending = "alone";
+    }
   },
 
-  rooftop_plan: {
-    text:
-`Saharsh convinces Calvin to meet on the old rooftop.
-
-The city lights glow below them.
-Calvin sets two take-out cups on the ledge—
-of course he brought drinks.
-
-They talk lightly.  
-Old jokes. Old memories.
-
-Saharsh’s heartbeat won’t slow.
-
-It’s now or never.`,
+  // fallback node
+  blank_end: {
+    text: `There is more to tell — but this branch ends here.`,
     choices: [
-      { text: "Start soft, easing the confession in.", next: "rooftop_confess_soft" },
-      { text: "Take a breath and say it clearly.", next: "rooftop_confess_direct" }
-    ]
-  },
-
-  cafe_plan: {
-    text:
-`The café has seen almost every version of them.
-
-They take their usual corner.
-Calvin orders the drinks without asking—
-he knows what Saharsh likes.
-
-Time feels suspended around them.`,
-    choices: [
-      { text: "Confess gently, through nostalgia.", next: "cafe_confess_soft" },
-      { text: "Make it playful, then honest.", next: "cafe_confess_playful" }
-    ]
-  },
-
-  letter_plan: {
-    text:
-`The blank page waits.
-
-Saharsh types, deletes, types again,
-until the truth finally arranges itself:
-
-how it started,
-how it grew,
-how terrifying it is to leave without saying it.
-
-The letter is too honest  
-and exactly right.`,
-    choices: [
-      { text: "Hand it to Calvin in person.", next: "letter_give" },
-      { text: "Send it after he’s already gone.", next: "letter_late" }
-    ]
-  },
-
-  rooftop_confess_soft: {
-    text:
-`Wind tugs at their hair.
-
-Saharsh cups his hands around the warm drink,
-something steady to hold onto.
-
-“Remember how we met?” he asks softly.
-“How everything felt like chaos, but somehow… you made it easier?”
-
-Calvin laughs quietly.
-
-Saharsh continues.
-“All the nights, the walks, the messages…
-They became my favorite part of this place.”
-
-He breathes in.
-
-“I’m in love with you, Calvin.”`,
-    choices: [
-      { text: "Wait for his reaction.", next: "reaction_core" }
-    ]
-  },
-
-  rooftop_confess_direct: {
-    text:
-`Saharsh sets his drink aside
-because his hands won’t stop shaking.
-
-“I’m in love with you,” he says,
-cutting straight through the small talk.
-
-The city hums below them.
-
-Calvin’s eyes widen—
-not scared, just stunned.`,
-    choices: [
-      { text: "Hold still and let the silence stretch.", next: "reaction_core" }
-    ]
-  },
-
-  cafe_confess_soft: {
-    text:
-`Saharsh traces circles on his mug.
-
-“Remember when we pulled that all-nighter here?
-And you declared instant noodles a valid personality trait?”
-
-Calvin grins.
-
-“It’s just…” Saharsh swallows.
-“You became my favorite part of every day.”
-
-He meets Calvin’s eyes.
-
-“I’m in love with you.”`,
-    choices: [
-      { text: "Let the words hang.", next: "reaction_core" }
-    ]
-  },
-
-  cafe_confess_playful: {
-    text:
-`Saharsh tries to sound casual.
-
-“So, hypothetically…  
-if your best friend confessed he was obnoxiously in love with you,
-what would you say?”
-
-Calvin snorts. “Hypothetically? Sounds like you.”
-
-Saharsh smiles, heart pounding.
-
-“It’s not hypothetical,” he says softly.
-“I’m in love with you.”`,
-    choices: [
-      { text: "Watch his expression shift.", next: "reaction_core" }
+      { text: "Back to start", next: "start" }
     ]
   }
 };
-</script>
 
+// ---------- Engine & state ----------
+const initialState = {
+  node: "start",
+  steps: 0,
+  history: [],
+  affection: 10, // 0..100
+  tension: 5,
+  honesty: 10,
+  progressSeen: 0,
+  ending: null
+};
+
+let state = JSON.parse(JSON.stringify(initialState));
+
+/* Utility: apply effects from a choice */
+function applyEffects(effects = {}) {
+  const keys = ['affection','tension','honesty'];
+  keys.forEach(k=>{
+    if (effects[k] !== undefined) {
+      state[k] += effects[k];
+      if (k === 'affection') state[k] = Math.max(0, Math.min(100, state[k]));
+      if (k === 'tension') state[k] = Math.max(0, Math.min(100, state[k]));
+      if (k === 'honesty') state[k] = Math.max(0, Math.min(100, state[k]));
+    }
+  });
+  if (effects.progress) {
+    state.progressSeen = Math.max(state.progressSeen || 0, state.progressSeen + effects.progress);
+  }
+}
+
+/* Shorthand condition evaluator. Accepts:
+   - undefined -> true
+   - function(state) -> bool
+   - object like { affection: ">=20", honesty: "<5" }
+*/
+function checkCondition(condition) {
+  if (!condition) return true;
+  if (typeof condition === 'function') return condition(state);
+  if (typeof condition === 'object') {
+    return Object.entries(condition).every(([k, expr])=>{
+      const val = state[k] || 0;
+      // expr can be string like ">=20" or number 10 meaning >=10
+      if (typeof expr === 'number') return val >= expr;
+      const m = /^([<>=!]+)\s*(\d+)$/.exec(expr);
+      if (!m) return true;
+      const op = m[1], cmp = Number(m[2]);
+      switch(op) {
+        case '>=': return val >= cmp;
+        case '<=': return val <= cmp;
+        case '>': return val > cmp;
+        case '<': return val < cmp;
+        case '==': return val == cmp;
+        case '!=': return val != cmp;
+        default: return true;
+      }
+    });
+  }
+  return true;
+}
+
+/* Render logic */
+const sceneEl = document.getElementById('scene');
+const choicesEl = document.getElementById('choices');
+const historyEl = document.getElementById('history');
+const stepsEl = document.getElementById('steps');
+const affBar = document.getElementById('affBar');
+const tenBar = document.getElementById('tenBar');
+const honBar = document.getElementById('honBar');
+const savedBadge = document.getElementById('savedBadge');
+const progressFill = document.getElementById('progressFill');
+
+function renderNode(key) {
+  const node = story[key];
+  if (!node) return;
+  // allow node.onEnter to modify state
+  if (typeof node.onEnter === 'function') node.onEnter(state);
+
+  // animate out/in
+  sceneEl.classList.add('fade-out');
+  setTimeout(()=> {
+    // build main text with some dynamic touches
+    let text = node.text;
+    // Inject small observations based on state to keep it dynamic
+    const dynamicNotes = [];
+    if (state.affection > 60) dynamicNotes.push("There is a warmth you carry like a pocket of light.");
+    if (state.tension > 40) dynamicNotes.push("You feel a tightness behind the ribs — unspoken worries that thrum.");
+    if (state.honesty > 50) dynamicNotes.push("Honesty tastes like salt and relief.");
+    if (dynamicNotes.length && Math.random() < 0.25) {
+      text += `\n\n— ${dynamicNotes[Math.floor(Math.random() * dynamicNotes.length)]}`;
+    }
+
+    sceneEl.textContent = text;
+    sceneEl.classList.remove('fade-out');
+
+    // choices
+    choicesEl.innerHTML = '';
+    const availableChoices = (node.choices || []).filter(c => checkCondition(c.condition));
+    if (!availableChoices.length) {
+      // show a default continue if none available
+      const btn = document.createElement('button');
+      btn.className = 'choiceBtn';
+      btn.textContent = 'Continue';
+      btn.onclick = () => doChoice({next:'blank_end', effects:{}});
+      choicesEl.appendChild(btn);
+    } else {
+      availableChoices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choiceBtn';
+        btn.innerHTML = `<span style="opacity:0.9;font-weight:700;margin-right:8px">[${idx+1}]</span> ${choice.text}`;
+        btn.onclick = () => doChoice(choice);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    // update status bars
+    affBar.style.width = `${state.affection}%`;
+    tenBar.style.width = `${state.tension}%`;
+    honBar.style.width = `${state.honesty}%`;
+
+    // progress (simple fraction of steps)
+    const prog = Math.min(100, Math.round((state.steps / 30) * 100));
+    progressFill.style.width = prog + '%';
+
+    // history
+    updateHistory();
+    stepsEl.textContent = state.steps;
+    savedBadge.style.display = 'none';
+  }, 160);
+}
+
+/* Apply choice - push to history */
+function doChoice(choice) {
+  if (!choice) return;
+  // push previous node to history with choice label
+  const prev = state.node;
+  state.history.push({node: prev, choice: choice.text, snapshot: JSON.parse(JSON.stringify(state))});
+  // apply effects
+  applyEffects(choice.effects || {});
+  // increment steps
+  state.steps++;
+  // next node
+  state.node = choice.next || 'blank_end';
+
+  // small auto branching: conditional endings
+  // if affection high and honesty high and tension low -> better ending
+  if (state.node && story[state.node] && story[state.node].onEnter) {
+    // already handled inside node
+  }
+
+  // some dynamic ending overrides
+  if (state.node === 'epilogue_long_distance') {
+    if (state.affection > 60 && state.honesty > 40) {
+      // possible reunion later
+      // keep as is
+    }
+  }
+
+  renderNode(state.node);
+}
+
+/* Undo last choice */
+function undo() {
+  if (!state.history.length) return;
+  const last = state.history.pop();
+  // restore snapshot (we intentionally restore to snapshot before choice)
+  const snapshot = last.snapshot || initialState;
+  state = JSON.parse(JSON.stringify(snapshot));
+  // remove last recorded step
+  state.steps = Math.max(0, state.steps - 1);
+  renderNode(state.node);
+}
+
+/* history UI */
+function updateHistory() {
+  historyEl.innerHTML = '';
+  if (!state.history.length) {
+    historyEl.innerHTML = '<div style="color:var(--muted)">No choices yet.</div>';
+    return;
+  }
+  state.history.slice().reverse().forEach((h, i) => {
+    const d = document.createElement('div');
+    d.style.marginBottom = '8px';
+    d.innerHTML = `<div style="font-size:0.86rem;color:var(--muted)">${h.node}</div><div class="choice-short">${h.choice}</div>`;
+    historyEl.appendChild(d);
+  });
+}
+
+/* Save & load */
+function saveGame() {
+  try {
+    localStorage.setItem('saga_state', JSON.stringify(state));
+    savedBadge.style.display = 'inline-block';
+    setTimeout(()=> savedBadge.style.display='none', 1800);
+  } catch(e) {
+    alert('Save failed: ' + e.message);
+  }
+}
+function loadGame() {
+  const s = localStorage.getItem('saga_state');
+  if (!s) { alert('No save found.'); return; }
+  try {
+    state = JSON.parse(s);
+    renderNode(state.node || 'start');
+  } catch(e) {
+    alert('Load failed: ' + e.message);
+  }
+}
+function resetGame() {
+  if (!confirm('Reset the story and clear progress?')) return;
+  state = JSON.parse(JSON.stringify(initialState));
+  renderNode('start');
+  localStorage.removeItem('saga_state');
+}
+
+/* Keyboard number shortcuts */
+document.addEventListener('keydown', (ev) => {
+  if (ev.key >= '1' && ev.key <= '9') {
+    const idx = Number(ev.key) - 1;
+    const node = story[state.node];
+    if (!node) return;
+    const available = (node.choices || []).filter(c => checkCondition(c.condition));
+    if (available[idx]) doChoice(available[idx]);
+  }
+  if (ev.key === 'u') undo();
+  if (ev.key === 's') saveGame();
+});
+
+/* Buttons */
+document.getElementById('saveBtn').addEventListener('click', saveGame);
+document.getElementById('loadBtn').addEventListener('click', loadGame);
+document.getElementById('resetBtn').addEventListener('click', resetGame);
+document.getElementById('undoBtn').addEventListener('click', () => {
+  undo();
+});
+
+/* Kick off */
+renderNode(state.node);
+
+/* Expose for debug in console */
+window.saga = { state, story, saveGame, loadGame, undo, renderNode };
+</script>
 </body>
 </html>
