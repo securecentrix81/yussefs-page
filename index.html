@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Saharsh &amp; Calvin: White Soul Saga (Advanced)</title>
+  <title>Saharsh & Calvin: Wet Saga</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -19,76 +19,35 @@
       justify-content: center;
     }
     .game {
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0, 0, 0, 0.5);
       border-radius: 16px;
-      max-width: 780px;
+      max-width: 700px;
       width: 90%;
       padding: 24px 28px 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
       backdrop-filter: blur(10px);
     }
-    .title {
-      font-size: 1.7rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .scene-text {
-      white-space: pre-line;
-      line-height: 1.5;
-      margin-bottom: 18px;
-      font-size: 1rem;
-    }
-    .choices {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .title { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 0.9rem; opacity: 0.75; margin-bottom: 18px; }
+    .scene-text { white-space: pre-line; line-height: 1.5; margin-bottom: 18px; font-size: 1rem; }
+    .choices { display: flex; flex-direction: column; gap: 8px; }
     button.choice {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-      text-align: left;
-      background: rgba(255,255,255,0.12);
-      color: #fdfdfd;
-      transition: background 0.2s, transform 0.05s, box-shadow 0.1s;
+      padding: 10px 14px; border-radius: 999px; border: none; cursor: pointer;
+      font-size: 0.95rem; text-align: left; background: rgba(255,255,255,0.12);
+      color: #fdfdfd; transition: background 0.2s, transform 0.05s, box-shadow 0.1s;
       box-shadow: 0 0 0 rgba(0,0,0,0);
     }
-    button.choice:hover {
-      background: rgba(255,255,255,0.20);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transform: translateY(-1px);
-    }
-    button.choice:active {
-      transform: translateY(0);
-      box-shadow: 0 0 0 rgba(0,0,0,0);
-    }
-    .meta {
-      margin-top: 14px;
-      font-size: 0.8rem;
-      opacity: 0.75;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .restart {
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.35);
-      background: transparent;
-      color: inherit;
-      cursor: pointer;
-      font-size: 0.75rem;
-    }
-    .restart:hover {
-      background: rgba(255,255,255,0.12);
-    }
+    button.choice:hover { background: rgba(255,255,255,0.20); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(-1px); }
+    button.choice:active { transform: translateY(0); box-shadow: 0 0 0 rgba(0,0,0,0); }
+    .meta { margin-top: 14px; font-size: 0.8rem; opacity: 0.7; display: flex; justify-content: space-between; align-items: center; }
+    .restart { padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); background: transparent; color: inherit; cursor: pointer; font-size: 0.75rem; }
+    .restart:hover { background: rgba(255,255,255,0.12); }
   </style>
 </head>
 <body>
   <div class="game">
-    <div class="title">Saharsh &amp; Calvin: White Soul Saga</div>
+    <div class="title">Saharsh & Calvin</div>
+    <div class="subtitle">A dark branching saga where Calvin is always wet</div>
     <div class="scene-text" id="text"></div>
     <div class="choices" id="choices"></div>
     <div class="meta">
@@ -98,64 +57,63 @@
   </div>
 
   <script>
-    // ======== STORY DATA ========
     const story = {
       start: {
         text: `Saharsh steps out of the cracked concrete stairwell behind the school. Cold air hits first, then silence. He's waiting for Calvin. He shouldn't be. But here he is.`,
         choices: [
-          { text: "Look around the empty yard", next: "look_yard" },
+          { text: "Look around the yard", next: "look_yard" },
           { text: "Check your phone", next: "check_phone" },
           { text: "Try not to think about Calvin", next: "avoid_thoughts" }
         ]
       },
       look_yard: {
-        text: "The yard behind the school is dead. The fence rattles. A lone soda can rolls across cracked asphalt. Calvin always finds him anyway.",
+        text: "The yard is empty. A lone soda can rolls. Calvin always finds him anyway.",
         choices: [
           { text: "Wait for Calvin", next: "wait_calvin" },
           { text: "Head back inside", next: "head_inside" },
-          { text: "Text Calvin where he is", next: "text_calvin" }
+          { text: "Text Calvin", next: "text_calvin" }
         ]
       },
       check_phone: {
-        text: "No messages. Not from Calvin. Not from anyone. He scrolls through old texts, stops at 'Bro fr tho, if something’s wrong, just tell me. I actually care.'",
+        text: "No messages from anyone. Old texts scroll by. 'Bro fr tho, if something’s wrong, just tell me. I actually care.'",
         choices: [
           { text: "Send a message", next: "text_calvin" },
-          { text: "Close the messages", next: "close_msg" },
-          { text: "Read more old messages", next: "read_msgs" }
+          { text: "Close messages", next: "close_msg" },
+          { text: "Read old messages", next: "read_msgs" }
         ]
       },
       avoid_thoughts: {
-        text: "He sits beside the wall, hood up. Tries to think about homework, lunch, anything else. None works. Calvin is still there in his mind.",
+        text: "Hood up, knees drawn. Tries thinking of homework, lunch, anything else. Calvin still in his mind.",
         choices: [
-          { text: "Force yourself to think of something else", next: "force_thought" },
-          { text: "Admit you’re anxious", next: "admit_anx" },
-          { text: "Stand up and walk it off", next: "walk_off" }
+          { text: "Force thoughts elsewhere", next: "force_thought" },
+          { text: "Admit anxiety", next: "admit_anx" },
+          { text: "Walk it off", next: "walk_off" }
         ]
       },
       text_calvin: {
-        text: "Saharsh hesitates above the keyboard. What to say? 'Where are you?' 'Did you forget?' 'Are you coming?' Every option sounds needy.",
+        text: "What to say? 'Where are you?' 'Did you forget?' Every option sounds needy.",
         choices: [
           { text: "Send: 'Where are you?'", next: "calvin_reply1" },
           { text: "Send: 'You comin or nah'", next: "calvin_reply2" },
-          { text: "Don’t send anything", next: "dont_send" }
+          { text: "Don't send anything", next: "dont_send" }
         ]
       },
       calvin_reply1: {
-        text: "The three dots appear. Calvin is typing. 'Outside the gym. Come here, I gotta show you something wild.'",
+        text: "Calvin: 'Outside the gym. Come here, gotta show you something wild.'",
         choices: [
           { text: "Go to the gym", next: "go_gym" },
           { text: "Ask what he wants to show", next: "ask_show" }
         ]
       },
       calvin_reply2: {
-        text: "Calvin replies: 'Bet. I’m near the gym. Hurry.'",
+        text: "Calvin: 'Bet. I’m near the gym. Hurry.'",
         choices: [
           { text: "Go to the gym", next: "go_gym" },
-          { text: "Pretend you didn’t see it", next: "pretend_ignore" }
+          { text: "Ignore it", next: "pretend_ignore" }
         ]
       },
       dont_send: {
-        text: "He locks his phone without typing anything. Coward. He stands up. The cold is worse.",
+        text: "Locks phone. Coward. Stands up. Cold bites harder.",
         choices: [
           { text: "Go find Calvin", next: "go_gym" },
           { text: "Stay outside", next: "stay_outside" }
@@ -164,72 +122,71 @@
       go_gym: {
         text: "Saharsh walks to the gym. Leaves scatter. Calvin leans against the wall. 'Slow as hell, bro. What took you?'",
         choices: [
-          { text: "Shrug and say nothing", next: "gym_meet1" },
-          { text: "Make a sarcastic comment", next: "gym_meet2" },
-          { text: "Tell him you weren’t sure he’d come", next: "gym_meet3" }
+          { text: "Shrug", next: "gym_meet1" },
+          { text: "Sarcastic comment", next: "gym_meet2" },
+          { text: "Say you weren’t sure he’d come", next: "gym_meet3" }
         ]
       },
       gym_meet1: {
-        text: "Calvin smirks. 'Silent protagonist arc? Bet.' He pushes open the gym door. 'Bro, you’re not gonna believe what I found inside.'",
+        text: "Calvin smirks. 'Silent protagonist arc? Bet.' Pushes open gym door. 'Bro, you won’t believe what I found.'",
         choices: [
-          { text: "Follow him inside", next: "gym_inside" },
+          { text: "Follow inside", next: "gym_inside" },
           { text: "Ask what he found", next: "ask_show" }
         ]
       },
       gym_inside: {
-        text: "The gym is dim. Lights flicker. Calvin points at the center court. A faint glow pulses on the floor. 'See? Tell me you see that too.'",
+        text: "Dim gym. Flickering lights. Calvin points at center court. A faint glow pulses on the floor. 'See? Tell me you see that too.'",
         choices: [
-          { text: "Step closer to the glowing crack", next: "crack1" },
-          { text: "Ask Calvin what he thinks it is", next: "ask_glow" },
+          { text: "Step closer to glow", next: "crack1" },
+          { text: "Ask Calvin what it is", next: "ask_glow" },
           { text: "Leave the gym", next: "leave_gym" }
         ]
       },
       crack1: {
-        text: "Saharsh steps closer. The glow brightens. Almost like it recognizes him. He kneels beside it. Calvin whispers: 'Dude… your hand is literally shaking.'",
+        text: "The glow brightens as Saharsh kneels beside it. Calvin whispers: 'Your hand is shaking.'",
         choices: [
           { text: "Touch the glowing crack", next: "touch_glow" },
-          { text: "Pull your hand back", next: "pull_back" }
+          { text: "Pull back", next: "pull_back" }
         ]
       },
       touch_glow: {
-        text: "Instant heat. Whispers flood his ears. Calvin shouts his name. The gym is gone. Everything drops away.",
+        text: "Instant heat. Whispers flood his ears. Gym disappears.",
         choices: [
           { text: "Keep listening", next: "void1" },
           { text: "Try to scream", next: "void2" }
         ]
       },
       pull_back: {
-        text: "He pulls back. Glow dims. Calvin kneels beside him. 'Dude. You good?' Too grounding.",
+        text: "Glow dims. Calvin kneels. 'You good?'",
         choices: [
-          { text: "Tell him you heard voices", next: "heard_voices" },
-          { text: "Lie and say you're fine", next: "lie_fine" }
+          { text: "Admit hearing voices", next: "heard_voices" },
+          { text: "Lie: I'm fine", next: "lie_fine" }
         ]
       },
       void1: {
-        text: "Falling into an endless void of voices. Shadows shift. Time stops.",
+        text: "Endless void of voices. Shadows shift. Time stops. Calvin is very wet.",
         choices: [
-          { text: "Call out for Calvin", next: "calvin_void" },
-          { text: "Try to focus on a memory", next: "memory_focus" }
+          { text: "Call for Calvin", next: "calvin_void" },
+          { text: "Focus on memory", next: "memory_focus" }
         ]
       },
       void2: {
-        text: "He screams. Nothing returns. Only echoes.",
+        text: "He screams. Only echoes return. Calvin is very wet.",
         choices: [
           { text: "Keep screaming", next: "void1" },
           { text: "Stay silent", next: "void1" }
         ]
       },
       ending_good: {
-        text: "Saharsh breathes. Calvin beside him. The fracture seals. Gym quiet. They walk out together.",
+        text: "Saharsh breathes. Calvin beside him. The fracture seals. Gym quiet. They walk out together. Calvin is very wet.",
         choices: []
       },
       ending_bad: {
-        text: "The crack consumes the court. Calvin screams. The void never gives back.",
+        text: "The crack consumes everything. Calvin screams. Nothing returns. Calvin is very wet.",
         choices: []
       }
     };
 
-    // ======== INTERACTIVE ENGINE ========
     let step = 0;
 
     function renderScene(id) {
@@ -240,23 +197,37 @@
       const choicesEl = document.getElementById("choices");
       const statusEl = document.getElementById("status");
 
-      step++;
-      textEl.textContent = scene.text;
-      choicesEl.innerHTML = "";
+      textEl.textContent = "";
+      const fullText = scene.text;
+      let i = 0;
+      const speed = 10;
 
+      function type() {
+        if (i <= fullText.length) {
+          textEl.textContent = fullText.slice(0, i);
+          i++;
+          requestAnimationFrame(type);
+        }
+      }
+      type();
+
+      choicesEl.innerHTML = "";
       scene.choices.forEach(choice => {
         const btn = document.createElement("button");
         btn.className = "choice";
         btn.textContent = choice.text;
-        btn.onclick = () => renderScene(choice.next);
+        btn.onclick = () => {
+          step++;
+          renderScene(choice.next);
+        };
         choicesEl.appendChild(btn);
       });
 
-      statusEl.textContent = `Scenes visited: ${step}`;
+      statusEl.textContent = `Step ${step}`;
     }
 
     function startGame() {
-      step = 0;
+      step = 1;
       renderScene("start");
     }
 
