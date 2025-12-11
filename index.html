@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Calvin & Saharsh: The Adventure</title>
+<title>Saharsh & Calvin: Full Adventure</title>
 <style>
 :root { color-scheme: light dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 body { margin:0; padding:0; background: radial-gradient(circle at top, #ffe6f2, #171721); color:#fdfdfd; min-height:100vh; display:flex; align-items:center; justify-content:center; }
@@ -21,8 +21,8 @@ button.choice:active { transform:translateY(0); box-shadow:0 0 0 rgba(0,0,0,0);}
 </head>
 <body>
 <div class="game">
-<div class="title">Calvin & Saharsh</div>
-<div class="subtitle">A fully branching adventure</div>
+<div class="title">Saharsh's Full Adventure</div>
+<div class="subtitle">Multi-path, fully functional</div>
 <div class="scene-text" id="text"></div>
 <div class="choices" id="choices"></div>
 <div class="meta">
@@ -30,149 +30,193 @@ button.choice:active { transform:translateY(0); box-shadow:0 0 0 rgba(0,0,0,0);}
 <button class="restart" onclick="startGame()">Restart</button>
 </div>
 </div>
+
 <script>
-const calvinState = { hasDrink: true };
+const calvinState = { hasDrink:true };
 
 const story = {
-start: {
-text: `Calvin has known Saharsh for a while. Tonight he plans to confess. Calvin is carrying a drink.`,
+start:{
+text:`Saharsh steps into the abandoned yard behind the school. Calvin is there, drink in hand, watching the wind.`,
 choices:[
-{ text:"Plan a casual walk", next:"walk_plan" },
-{ text:"Invite for coffee", next:"coffee_invite" },
-{ text:"Send a heartfelt message", next:"text_plan" }
+{ text:"Look around the yard", next:"look_yard" },
+{ text:"Check your phone", next:"check_phone" },
+{ text:"Try to ignore Calvin", next:"avoid_thoughts" }
 ]
 },
-walk_plan: {
-text:`Calvin texts: "Want to go for a walk? 😅"`,
+look_yard:{
+text:`The yard is empty except for scattered leaves and a soda can. Calvin sips his drink casually.`,
 choices:[
-{ text:"Agree to meet", next:"walk_meet" },
-{ text:"Try to reschedule", next:"walk_reschedule" }
+{ text:"Wait for Calvin", next:"wait_calvin" },
+{ text:"Go back inside", next:"head_inside" },
+{ text:"Text Calvin where you are", next:"text_calvin" }
 ]
 },
-walk_reschedule: {
-text:`Calvin reschedules: "7 works. See you then."`,
+check_phone:{
+text:`Saharsh unlocks his phone. No new messages from Calvin. He scrolls through old conversations.`,
 choices:[
-{ text:"Go meet Saharsh", next:"walk_meet" }
+{ text:"Send Calvin a message", next:"text_calvin" },
+{ text:"Put phone away and focus", next:"avoid_thoughts" }
 ]
 },
-walk_meet: {
-text:`Calvin meets Saharsh. They walk side by side. Calvin has a drink.`,
+avoid_thoughts:{
+text:`Saharsh tries to focus on something else. The cold makes him shiver. Calvin watches, drink in hand.`,
 choices:[
-{ text:"Confess directly", next:"confess_direct" },
-{ text:"Confess softly", next:"confess_soft" }
+{ text:"Force yourself to think of homework", next:"force_thoughts" },
+{ text:"Stand up and walk around", next:"walk_off" }
 ]
 },
-coffee_invite: {
-text:`Calvin invites Saharsh for coffee. Calvin is holding his drink.`,
+text_calvin:{
+text:`Saharsh types a message to Calvin. Calvin tilts his head, drink in hand, waiting.`,
 choices:[
-{ text:"Talk about memories", next:"coffee_memories" },
-{ text:"Blurt confession", next:"coffee_blurt" }
+{ text:"Ask where he is", next:"calvin_reply" },
+{ text:"Send a casual emoji", next:"calvin_reply" }
 ]
 },
-coffee_memories: {
-text:`They share memories over coffee. Calvin sips his drink.`,
+wait_calvin:{
+text:`Calvin approaches, holding his drink, grinning.`,
 choices:[
-{ text:"Confess softly", next:"confess_soft" },
-{ text:"Confess playfully", next:"confess_playful" }
+{ text:"Greet him warmly", next:"gym_meet" },
+{ text:"Stay silent", next:"gym_meet" }
 ]
 },
-coffee_blurt: {
-text:`Calvin blurts: "I like you."`,
+head_inside:{
+text:`Saharsh walks back inside. The halls echo.`,
 choices:[
-{ text:"Wait", next:"reaction_slow" },
-{ text:"Ramble nervously", next:"ramble" }
+{ text:"Check the gym", next:"gym_meet" },
+{ text:"Sit in the classroom", next:"classroom_scene" }
 ]
 },
-text_plan: {
-text:`Calvin writes a message to Saharsh. He keeps sipping his drink.`,
+gym_meet:{
+text:`The gym is dim. A strange glowing crack is on the floor. Calvin sips his drink and points.`,
 choices:[
-{ text:"Be simple", next:"text_simple" },
-{ text:"Be poetic", next:"text_poetic" }
+{ text:"Step closer", next:"crack1" },
+{ text:"Ask what's happening", next:"ask_glow" },
+{ text:"Leave the gym", next:"leave_gym" }
 ]
 },
-text_simple: {
-text:`"I really like you as more than a friend."`,
+ask_glow:{
+text:`Calvin whispers: "I saw this earlier. Something is… odd."`,
 choices:[
-{ text:"Send", next:"sent_text" },
-{ text:"Meet in person", next:"meet_instead" }
+{ text:"Investigate", next:"crack1" },
+{ text:"Tell Calvin to go first", next:"calvin_go_first" }
 ]
 },
-text_poetic: {
-text:`"Between our talks, I realized my favorite part of the day is you."`,
+leave_gym:{
+text:`The gym feels heavy. Calvin sips his drink while Saharsh hesitates.`,
 choices:[
-{ text:"Send", next:"sent_text" },
-{ text:"Meet in person", next:"meet_instead" }
+{ text:"Follow reluctantly", next:"crack1" },
+{ text:"Leave completely", next:"walk_off" }
 ]
 },
-meet_instead: {
-text:`Calvin deletes the message and texts: "Can we talk in person later?"`,
+crack1:{
+text:`Saharsh touches the glowing crack. Whispers surround him. Calvin steadies his drink.`,
 choices:[
-{ text:"Go meet Saharsh", next:"walk_meet" }
+{ text:"Listen to the whispers", next:"void1" },
+{ text:"Pull your hand back", next:"pull_back1" }
 ]
 },
-sent_text: {
-text:`Message sent. Calvin sips his drink anxiously.`,
+pull_back1:{
+text:`The glow dims. Calvin pats Saharsh on the shoulder, drink still in hand.`,
 choices:[
-{ text:"Open reply", next:"text_reply" }
+{ text:"Admit hearing voices", next:"heard_voices" },
+{ text:"Pretend everything is fine", next:"lie_fine" }
 ]
 },
-text_reply: {
-text:`"I care about you too. Can we talk in person?"`,
+force_thoughts:{
+text:`Saharsh tries to concentrate. Calvin leans against a wall, drink in hand.`,
 choices:[
-{ text:"Meet up", next:"final_confession" }
+{ text:"Keep trying", next:"gym_meet" },
+{ text:"Give up and walk", next:"walk_off" }
 ]
 },
-confess_direct: {
-text:`"I like you, Saharsh." Calvin holds his drink tightly.`,
+walk_off:{
+text:`Saharsh walks around to clear his head. Calvin follows, drink in hand.`,
 choices:[
-{ text:"Wait for response", next:"reaction_slow" }
+{ text:"Talk to Calvin", next:"gym_meet" },
+{ text:"Stay silent", next:"head_inside" }
 ]
 },
-confess_soft: {
-text:`"I… I’ve started to like you as more than a friend."`,
+classroom_scene:{
+text:`The classroom is empty. Saharsh thinks deeply.`,
 choices:[
-{ text:"Watch reaction", next:"reaction_slow" }
+{ text:"Go check the gym", next:"gym_meet" },
+{ text:"Stay put", next:"walk_off" }
 ]
 },
-confess_playful: {
-text:`"Hypothetically, if I liked you… just a tiny bit?"`,
+calvin_reply:{
+text:`Calvin responds almost immediately. Drink in hand, he gestures towards the gym.`,
 choices:[
-{ text:"Admit seriousness", next:"reaction_playful" }
+{ text:"Go to the gym", next:"gym_meet" },
+{ text:"Ignore him for now", next:"walk_off" }
 ]
 },
-ramble: {
-text:`Calvin rambles. Saharsh interrupts gently.`,
+void1:{
+text:`Saharsh is in a strange void beneath the gym. Whispers swirl around. Calvin floats nearby, drink in hand.`,
 choices:[
-{ text:"Go quiet", next:"reaction_slow" }
+{ text:"Explore the void", next:"void_explore" },
+{ text:"Call out to Calvin", next:"void_call" }
 ]
 },
-reaction_slow: {
-text:`Saharsh smiles nervously.`,
+void_explore:{
+text:`The echoes guide Saharsh. He feels pressure on his chest. Calvin sips his drink nervously.`,
 choices:[
-{ text:"Ask more", next:"reaction_deepen" },
-{ text:"Stay silent", next:"reaction_deepen" }
+{ text:"Try to stabilize the fracture", next:"stabilize" },
+{ text:"Let the voices lead", next:"echo_path" }
 ]
 },
-reaction_playful: {
-text:`Saharsh laughs. Calvin sips his drink, waiting.`,
+void_call:{
+text:`Calvin floats closer. Drink in hand.`,
 choices:[
-{ text:"Wait for response", next:"reaction_deepen" }
+{ text:"Grab his hand", next:"pull_out" },
+{ text:"Step back and observe", next:"void_explore" }
 ]
 },
-reaction_deepen: {
-text:`Saharsh: "I like you too. You mean a lot."`,
+stabilize:{
+text:`Saharsh touches the fracture. The glow steadies. Calvin cheers while sipping.`,
 choices:[
-{ text:"Confess again", next:"final_confession" }
+{ text:"Leave the void together", next:"ending_good" }
 ]
 },
-final_confession: {
-text:`Calvin: "I’m in love with you." Saharsh smiles. Calvin sips his drink. Hearts align.`,
+echo_path:{
+text:`Saharsh lets the echoes guide him. Calvin tries to intervene, drink in hand.`,
 choices:[
-{ text:"Stay together", next:"epilogue" }
+{ text:"Resist", next:"ending_bad" },
+{ text:"Accept", next:"ending_true" }
 ]
 },
-epilogue: {
-text:`Later, Calvin remembers Saharsh's eyes, the warmth, and his drink. They found each other. — The End —`,
+pull_out:{
+text:`Saharsh pulls Calvin from a smaller echo trap. Glow dims.`,
+choices:[
+{ text:"Thank him", next:"ending_good" },
+{ text:"Stay quiet", next:"ending_true" }
+]
+},
+heard_voices:{
+text:`Saharsh admits the whispers. Calvin nods, still holding his drink.`,
+choices:[
+{ text:"Move forward", next:"crack1" }
+]
+},
+lie_fine:{
+text:`Saharsh lies. Calvin smiles, sipping his drink.`,
+choices:[
+{ text:"Proceed", next:"crack1" }
+]
+},
+ending_good:{
+text:`The fracture settles. Saharsh and Calvin leave together. Calvin’s drink is still full. Calm returns.`,
+choices:[
+{ text:"Play again", next:"start" }
+]
+},
+ending_bad:{
+text:`The void swallows everything. Calvin spills his drink trying to help.`,
+choices:[
+{ text:"Restart", next:"start" }
+]
+},
+ending_true:{
+text:`Saharsh stabilizes all echoes. Calvin cheers, drink in hand. Reality resets perfectly.`,
 choices:[
 { text:"Play again", next:"start" }
 ]
@@ -180,42 +224,22 @@ choices:[
 };
 
 let step = 0;
-
 function renderScene(id){
-const scene = story[id];
-if(!scene) return;
-
-const textEl = document.getElementById("text");
-const choicesEl = document.getElementById("choices");
-const statusEl = document.getElementById("status");
-
-let sceneText = scene.text;
-if(calvinState.hasDrink) sceneText = "Calvin has a drink in his hand.\n\n" + sceneText;
-
+const scene=story[id]; if(!scene) return;
+const textEl=document.getElementById("text");
+const choicesEl=document.getElementById("choices");
+const statusEl=document.getElementById("status");
 textEl.textContent="";
-const fullText = sceneText;
-let i=0;
-function type(){
-if(i<=fullText.length){
-textEl.textContent = fullText.slice(0,i);
-i++;
-requestAnimationFrame(type);
-}
-}
+let i=0; const fullText=scene.text;
+function type(){ if(i<=fullText.length){ textEl.textContent=fullText.slice(0,i); i++; requestAnimationFrame(type); } }
 type();
-
 choicesEl.innerHTML="";
-scene.choices.forEach(choice=>{
-const btn=document.createElement("button");
-btn.className="choice";
-btn.textContent=choice.text;
-btn.onclick=()=>{ step++; renderScene(choice.next); };
-choicesEl.appendChild(btn);
+scene.choices.forEach(choice=>{ 
+const btn=document.createElement("button"); btn.className="choice"; btn.textContent=choice.text;
+btn.onclick=()=>{ step++; renderScene(choice.next); }; choicesEl.appendChild(btn);
 });
-
 statusEl.textContent=`Step ${step}`;
 }
-
 function startGame(){ step=1; renderScene("start"); }
 startGame();
 </script>
