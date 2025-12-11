@@ -1,135 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Saharsh & Calvin: Wet Saga Functional</title>
-<style>
-  body { margin:0; padding:0; font-family:system-ui, sans-serif; background:#171721; color:#fdfdfd; display:flex; justify-content:center; align-items:center; min-height:100vh;}
-  .game { background:rgba(0,0,0,0.5); padding:20px; border-radius:12px; width:90%; max-width:600px; }
-  .scene-text { white-space:pre-line; margin-bottom:12px; }
-  .choices { display:flex; flex-direction:column; gap:6px; }
-  button.choice { padding:8px; border-radius:999px; border:none; cursor:pointer; background:rgba(255,255,255,0.15); color:#fff; transition:0.1s; }
-  button.choice:hover{background:rgba(255,255,255,0.3);}
-</style>
+  <meta charset="UTF-8">
+  <title>Calvin & Saharsh: The Confession</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #ffe6f2, #171721);
+      color: #fdfdfd;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .game {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 16px;
+      max-width: 700px;
+      width: 90%;
+      padding: 24px 28px 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+    }
+    .title { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 0.9rem; opacity: 0.75; margin-bottom: 18px; }
+    .scene-text { white-space: pre-line; line-height: 1.5; margin-bottom: 18px; font-size: 1rem; }
+    .choices { display: flex; flex-direction: column; gap: 8px; }
+    button.choice {
+      padding: 10px 14px; border-radius: 999px; border: none; cursor: pointer;
+      font-size: 0.95rem; text-align: left; background: rgba(255,255,255,0.12);
+      color: #fdfdfd; transition: background 0.2s, transform 0.05s, box-shadow 0.1s;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+    button.choice:hover { background: rgba(255,255,255,0.20); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(-1px); }
+    button.choice:active { transform: translateY(0); box-shadow: 0 0 0 rgba(0,0,0,0); }
+    .meta { margin-top: 14px; font-size: 0.8rem; opacity: 0.7; display: flex; justify-content: space-between; align-items: center; }
+    .restart { padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); background: transparent; color: inherit; cursor: pointer; font-size: 0.75rem; }
+    .restart:hover { background: rgba(255,255,255,0.12); }
+  </style>
 </head>
 <body>
-<div class="game">
-  <div class="scene-text" id="text"></div>
-  <div class="choices" id="choices"></div>
-</div>
-<script>
-const story = {
-  start: { text:"Saharsh waits behind the school. Calvin is very wet.",
-    choices:[
-      { text:"Look around the yard", next:"yard" },
-      { text:"Check your phone", next:"phone" },
-      { text:"Avoid thoughts of Calvin", next:"avoid" }
-    ]
-  },
+  <div class="game">
+    <div class="title">Calvin & Saharsh</div>
+    <div class="subtitle">A choose-your-own-adventure</div>
+    <div class="scene-text" id="text"></div>
+    <div class="choices" id="choices"></div>
+    <div class="meta">
+      <span id="status"></span>
+      <button class="restart" onclick="startGame()">Restart</button>
+    </div>
+  </div>
 
-  // PATH: YARD
-  yard: { text:"The yard is empty. Calvin is very wet.",
-    choices:[
-      { text:"Wait for Calvin", next:"gym" },
-      { text:"Head inside", next:"inside" },
-      { text:"Text Calvin", next:"textCalvin" }
-    ]
-  },
+  <script>
+    const story = {
+      start: {
+        text: `Calvin has known Saharsh for a while now.
 
-  // PATH: PHONE
-  phone: { text:"No new messages. Calvin is very wet.",
-    choices:[
-      { text:"Text Calvin now", next:"textCalvin" },
-      { text:"Scroll old messages", next:"oldMsgs" },
-      { text:"Close phone", next:"gym" }
-    ]
-  },
+Tonight, Calvin has decided: *I’m going to tell Saharsh how I feel.*`,
+        choices: [
+          { text: "Plan a casual walk", next: "walk_plan" },
+          { text: "Invite for coffee", next: "coffee_invite" },
+          { text: "Send a heartfelt message", next: "text_plan" }
+        ]
+      },
+      walk_plan: {
+        text: `Calvin types: “Hey, want to go for a walk later? 😅”
 
-  oldMsgs: { text:"Scrolling old texts. Calvin is very wet.",
-    choices:[
-      { text:"Go find Calvin", next:"gym" }
-    ]
-  },
+Saharsh replies: “Yeah, 7 pm works.”`,
+        choices: [
+          { text: "Go for the walk", next: "walk_meet" },
+          { text: "Try to reschedule", next: "walk_reschedule" }
+        ]
+      },
+      walk_reschedule: {
+        text: `Calvin hesitates, but replies: “7 works. See you then.”`,
+        choices: [
+          { text: "Go meet Saharsh", next: "walk_meet" }
+        ]
+      },
+      walk_meet: {
+        text: `The sky turns orange. Calvin walks beside Saharsh, carrying his drink.
 
-  // PATH: AVOID
-  avoid: { text:"Pulling hood up, trying not to think. Calvin is very wet.",
-    choices:[
-      { text:"Admit anxiety", next:"gym" },
-      { text:"Walk it off", next:"gym" },
-      { text:"Force thoughts elsewhere", next:"gym" }
-    ]
-  },
+There’s a comfortable silence. Calvin’s heart races.`,
+        choices: [
+          { text: "Confess directly", next: "confess_direct" },
+          { text: "Confess softly", next: "confess_soft" }
+        ]
+      },
+      coffee_invite: {
+        text: `After class, Calvin asks: “Want coffee?” Saharsh smiles. Calvin sips his drink.`,
+        choices: [
+          { text: "Talk about memories first", next: "coffee_memories" },
+          { text: "Blurt confession now", next: "coffee_blurt" }
+        ]
+      },
+      coffee_memories: {
+        text: `They sip coffee together, reminiscing. Calvin feels courage rising.`,
+        choices: [
+          { text: "Confess softly", next: "confess_soft" },
+          { text: "Confess playfully", next: "confess_playful" }
+        ]
+      },
+      coffee_blurt: {
+        text: `Calvin blurts: “I like you. A lot.”`,
+        choices: [
+          { text: "Wait and watch", next: "reaction_slow" },
+          { text: "Rambling nervously", next: "ramble" }
+        ]
+      },
+      text_plan: {
+        text: `Calvin stares at the blank message. Sipping his drink helps him focus.`,
+        choices: [
+          { text: "Simple and honest", next: "text_simple" },
+          { text: "Poetic and dramatic", next: "text_poetic" }
+        ]
+      },
+      text_simple: {
+        text: `"I really like you as more than a friend."`,
+        choices: [
+          { text: "Send", next: "sent_text" },
+          { text: "Meet in person instead", next: "meet_instead" }
+        ]
+      },
+      text_poetic: {
+        text: `"Somewhere between our talks, I realized… my favorite part of the day is you."`,
+        choices: [
+          { text: "Send", next: "sent_text" },
+          { text: "Meet in person instead", next: "meet_instead" }
+        ]
+      },
+      meet_instead: {
+        text: `Calvin deletes the message and texts: “Can we talk in person later?”`,
+        choices: [
+          { text: "Go meet Saharsh", next: "walk_meet" }
+        ]
+      },
+      sent_text: {
+        text: `Message sent. Heart pounding. Calvin takes a sip of his drink. Saharsh replies:`,
+        choices: [
+          { text: "Read reply", next: "text_reply" }
+        ]
+      },
+      text_reply: {
+        text: `"I care about you too. Can we talk in person?"`,
+        choices: [
+          { text: "Meet up", next: "final_confession" }
+        ]
+      },
+      confess_direct: {
+        text: `Calvin says: “I like you, Saharsh. Not just as a friend.” He holds his drink tightly.`,
+        choices: [
+          { text: "Wait for response", next: "reaction_slow" }
+        ]
+      },
+      confess_soft: {
+        text: `Calvin whispers softly: “I… I’ve started to like you as more than a friend.”`,
+        choices: [
+          { text: "Watch reaction", next: "reaction_slow" }
+        ]
+      },
+      confess_playful: {
+        text: `Calvin jokes nervously: “Hypothetically, if I liked you… just a tiny bit?”`,
+        choices: [
+          { text: "Admit seriousness", next: "reaction_playful" }
+        ]
+      },
+      ramble: {
+        text: `Calvin spills words nervously. Saharsh gently interrupts.`,
+        choices: [
+          { text: "Go quiet", next: "reaction_slow" }
+        ]
+      },
+      reaction_slow: {
+        text: `Saharsh smiles nervously: “I had a feeling.”`,
+        choices: [
+          { text: "Ask more", next: "reaction_deepen" },
+          { text: "Stay silent", next: "reaction_deepen" }
+        ]
+      },
+      reaction_playful: {
+        text: `Saharsh laughs: “Not surprising.” Calvin sips his drink, waiting.`,
+        choices: [
+          { text: "Wait for response", next: "reaction_deepen" }
+        ]
+      },
+      reaction_deepen: {
+        text: `Saharsh admits: “I like you too. You mean a lot to me.”`,
+        choices: [
+          { text: "Confess again", next: "final_confession" }
+        ]
+      },
+      final_confession: {
+        text: `Calvin: “I’m in love with you, Saharsh.” Saharsh smiles. Calvin takes a celebratory sip of his drink.
 
-  // TEXT CALVIN
-  textCalvin: { text:"Sends a message. Calvin is very wet.",
-    choices:[
-      { text:"Ask 'Where are you?'", next:"calvinReply" },
-      { text:"Say 'You comin or nah'", next:"calvinReply2" },
-      { text:"Don't send", next:"gym" }
-    ]
-  },
+The world outside keeps moving, but for a moment, it’s just the two of them.`,
+        choices: [
+          { text: "Stay together", next: "epilogue" }
+        ]
+      },
+      epilogue: {
+        text: `Later, Calvin remembers Saharsh’s eyes, the warmth, and his drink in hand. They found each other. — The End —`,
+        choices: [
+          { text: "Play again", next: "start" }
+        ]
+      }
+    };
 
-  calvinReply: { text:"Calvin: 'Outside the gym. Come quick!' Calvin is very wet.",
-    choices:[ { text:"Go to gym", next:"gym" } ]
-  },
+    let step = 0;
+    const calvinState = { hasDrink: true };
 
-  calvinReply2: { text:"Calvin: 'Bet. Near gym. Hurry!' Calvin is very wet.",
-    choices:[ { text:"Go to gym", next:"gym" } ]
-  },
+    function renderScene(id) {
+      const scene = story[id];
+      if (!scene) return;
 
-  // GYM ENCOUNTER
-  gym: { text:"Saharsh enters gym. Calvin leans against wall. Calvin is very wet.",
-    choices:[
-      { text:"Follow Calvin inside", next:"insideGym" },
-      { text:"Ask about the glow", next:"insideGym" }
-    ]
-  },
+      const textEl = document.getElementById("text");
+      const choicesEl = document.getElementById("choices");
+      const statusEl = document.getElementById("status");
 
-  insideGym: { text:"Glow on floor. Calvin is very wet.",
-    choices:[
-      { text:"Step closer to glow", next:"crack" },
-      { text:"Leave the gym", next:"endingGood" }
-    ]
-  },
+      let sceneText = scene.text;
+      if (calvinState.hasDrink) sceneText = "Calvin has a drink in his hand.\n\n" + sceneText;
 
-  crack: { text:"Glow pulses. Calvin whispers. Calvin is very wet.",
-    choices:[
-      { text:"Touch the glow", next:"endingGood" },
-      { text:"Pull back", next:"endingBad" }
-    ]
-  },
+      textEl.textContent = "";
+      const fullText = sceneText;
+      let i = 0;
+      function type() {
+        if (i <= fullText.length) {
+          textEl.textContent = fullText.slice(0, i);
+          i++;
+          requestAnimationFrame(type);
+        }
+      }
+      type();
 
-  inside: { text:"Saharsh heads inside. Calvin is very wet.",
-    choices:[ { text:"Find Calvin later", next:"gym" } ]
-  },
+      choicesEl.innerHTML = "";
+      scene.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "choice";
+        btn.textContent = choice.text;
+        btn.onclick = () => {
+          step++;
+          renderScene(choice.next);
+        };
+        choicesEl.appendChild(btn);
+      });
 
-  endingGood: { text:"Everything stabilizes. Calvin is very wet. They walk out together.",
-    choices:[ { text:"Restart", next:"start" } ]
-  },
+      statusEl.textContent = `Step ${step}`;
+    }
 
-  endingBad: { text:"The glow consumes the gym. Calvin is very wet.",
-    choices:[ { text:"Restart", next:"start" } ]
-  }
-};
+    function startGame() {
+      step = 1;
+      renderScene("start");
+    }
 
-let step=0;
-function renderScene(id){
-  const scene=story[id];
-  if(!scene) return;
-  const textEl=document.getElementById("text");
-  const choicesEl=document.getElementById("choices");
-  textEl.textContent=scene.text;
-  choicesEl.innerHTML="";
-  scene.choices.forEach(choice=>{
-    const btn=document.createElement("button");
-    btn.className="choice";
-    btn.textContent=choice.text;
-    btn.onclick=()=>{ step++; renderScene(choice.next); };
-    choicesEl.appendChild(btn);
-  });
-}
-function startGame(){ step=1; renderScene("start"); }
-startGame();
-</script>
+    startGame();
+  </script>
 </body>
 </html>
